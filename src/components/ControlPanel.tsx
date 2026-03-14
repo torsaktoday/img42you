@@ -8,7 +8,7 @@ import {
   Wand2,
   X,
 } from 'lucide-react';
-import type { ChangeEvent, DragEvent, RefObject } from 'react';
+import type { ChangeEvent, DragEvent, ReactNode, RefObject } from 'react';
 import { brainModels, platforms, videoTypes } from '../constants/app';
 import type { ReferenceImage, VeoModel, VideoType } from '../types/app';
 
@@ -41,6 +41,7 @@ interface ControlPanelProps {
   onGeneratePrompts: () => void;
   onGenerateSalesReview: () => void;
   onGenerateVideo: () => void;
+  reviewVoiceStyleSlot?: ReactNode;
 }
 
 export function ControlPanel({
@@ -72,6 +73,7 @@ export function ControlPanel({
   onGeneratePrompts,
   onGenerateSalesReview,
   onGenerateVideo,
+  reviewVoiceStyleSlot,
 }: ControlPanelProps) {
   return (
     <>
@@ -271,6 +273,8 @@ export function ControlPanel({
         </div>
       </section>
 
+      {reviewVoiceStyleSlot}
+
       <AnimatePresence>
         {error && (
           <motion.div
@@ -314,7 +318,7 @@ export function ControlPanel({
           className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-900 disabled:text-zinc-600 text-white rounded-2xl font-bold transition-all flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20 disabled:shadow-none relative overflow-hidden group"
         >
           {isGeneratingReview ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-          {isGeneratingReview ? 'Creating Sales Review...' : 'Gen Thai Sales Review (45-90s + 6 Clips)'}
+          {isGeneratingReview ? 'Creating Sales Review...' : 'Gen Thai Review \+ Styled Voice'}
         </button>
 
         {hasGeneratedImage && (
@@ -341,3 +345,6 @@ export function ControlPanel({
     </>
   );
 }
+
+
+

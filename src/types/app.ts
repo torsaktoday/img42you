@@ -46,3 +46,24 @@ export interface SalesReview {
 
 export type VideoType = 'grok' | 'flow';
 export type VeoModel = 'fast' | 'normal';
+export type VoiceCategory = 'female' | 'male' | 'kid' | 'teen';
+
+export interface VoicePreset {
+  id: string;
+  label: string;
+  category: VoiceCategory;
+  voiceName: string;
+  description: string;
+  energy: string;
+}
+
+export interface ReviewStylePreset {
+  id: string;
+  label: string;
+  shortLabel: string;
+  description: string;
+  scriptDirection: string;
+  sceneDirection: string;
+  deliveryDirection: string;
+  previewTemplate: string;
+}

@@ -181,16 +181,30 @@ export async function generateVideoPlan(params: VideoPlanParams) {
   };
 }
 
-export async function generateSpeechAudio(params: { apiKey: string; script: string }) {
+export async function generateSpeechAudio(params: {
+  apiKey: string;
+  script: string;
+  voiceName: string;
+  deliveryDirection?: string;
+}) {
   const ai = createClient(params.apiKey);
+  const speechPrompt = [
+    'Read the following Thai script naturally.',
+    params.deliveryDirection || 'Use a natural Thai speaking style.',
+    'Keep the wording exactly as written in the SCRIPT block.',
+    '',
+    'SCRIPT:',
+    params.script,
+  ].join('\n');
+
   const ttsResponse = await ai.models.generateContent({
     model: 'gemini-2.5-flash-preview-tts',
-    contents: [{ parts: [{ text: params.script }] }],
+    contents: [{ parts: [{ text: speechPrompt }] }],
     config: {
       responseModalities: ['AUDIO'],
       speechConfig: {
         voiceConfig: {
-          prebuiltVoiceConfig: { voiceName: 'Kore' },
+          prebuiltVoiceConfig: { voiceName: params.voiceName },
         },
       },
     },
@@ -258,6 +272,12 @@ export async function generateSalesReview(params: {
   aspectRatio: string;
   platformName?: string;
   referenceImages: ReferenceImage[];
+  voiceLabel: string;
+  voiceEnergy: string;
+  styleLabel: string;
+  styleDescription: string;
+  styleScriptDirection: string;
+  styleSceneDirection: string;
 }): Promise<SalesReview> {
   const ai = createClient(params.apiKey);
   const parts = getImageParts(params.referenceImages);
@@ -272,6 +292,15 @@ export async function generateSalesReview(params: {
     The target platform is ${params.platformName} (${params.aspectRatio}).
     The total duration should be between 45 - 90 seconds.
     
+    CREATIVE DIRECTION:
+    - Seller voice persona: ${params.voiceLabel}
+    - Voice energy: ${params.voiceEnergy}
+    - Target delivery style: ${params.styleLabel}
+    - Style description: ${params.styleDescription}
+    - Script direction: ${params.styleScriptDirection}
+    - Scene direction: ${params.styleSceneDirection}
+    - The narration must sound excellent when spoken out loud in Thai with this selected voice persona and style.
+    
     Requirements for the script:
     - Use persuasive, energetic, and natural Thai language (Expert level).
     - Include emotional triggers and clear benefits discovered in your research.
@@ -280,14 +309,16 @@ export async function generateSalesReview(params: {
       2. PAIN POINT: Deeply empathize with the user's problem.
       3. SOLUTION: How this product solves it perfectly. Highlight unique features.
       4. CALL TO ACTION: Urgency to click the basket/link.
+    - The copy must match the selected selling style, rhythm, and performance energy.
     
     Also, provide 6 cinematic scene descriptions. For each scene, provide:
-    - description: Motion Prompt for video generation (camera movement, action).
+    - description: Motion Prompt for video generation (camera movement, action). Make sure the motion and performance reflect the chosen selling style.
     - imagePrompt: A high-quality, detailed prompt for generating a static image. 
       CRITICAL: Describe the product with extreme detail (labels, colors, bottle shape) based on your research. 
       Ensure the character's appearance (face) is consistent with the reference image.
       Describe the clothing clearly (e.g., "wearing a clean white t-shirt") to maintain consistency.
       The image must be clean with NO watermarks, NO text, and NO logos except the product label.
+      The pose, facial expression, and styling must reflect the chosen style direction.
     - narration: The specific Thai dialogue/narration for this exact scene.
     
     Return the result in JSON format:

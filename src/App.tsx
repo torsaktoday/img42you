@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, DragEvent } from 'react';
-import { platforms } from './constants/app';
+import { platforms, reviewStyles, voicePresets } from './constants/app';
 import { AppHeader } from './components/AppHeader';
 import { CinematicPromptsPanel } from './components/CinematicPromptsPanel';
 import { ControlPanel } from './components/ControlPanel';
 import { ImageLightbox } from './components/ImageLightbox';
 import { OutputPanel } from './components/OutputPanel';
+import { ReviewVoiceStylePanel } from './components/ReviewVoiceStylePanel';
 import { SalesReviewPanel } from './components/SalesReviewPanel';
 import { SettingsModal } from './components/SettingsModal';
 import {
@@ -24,6 +25,7 @@ import type {
   SalesReview,
   VeoModel,
   VideoType,
+  VoiceCategory,
 } from './types/app';
 
 export default function App() {
@@ -54,11 +56,19 @@ export default function App() {
   const [apiKey, setApiKey] = useState('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [tempApiKey, setTempApiKey] = useState('');
+  const [selectedVoiceCategory, setSelectedVoiceCategory] = useState<VoiceCategory>('female');
+  const [selectedVoiceId, setSelectedVoiceId] = useState('female-warm-sulafat');
+  const [selectedStyleId, setSelectedStyleId] = useState('review');
+  const [isPreviewingVoice, setIsPreviewingVoice] = useState(false);
+  const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const isEnvironmentKeyAvailable = !!process.env.GEMINI_API_KEY;
+  const selectedPlatform = platforms.find((platform) => platform.ratio === aspectRatio);
+  const selectedVoice = voicePresets.find((voice) => voice.id === selectedVoiceId) || voicePresets[0];
+  const selectedStyle = reviewStyles.find((style) => style.id === selectedStyleId) || reviewStyles[0];
 
   useEffect(() => {
     if (isEnvironmentKeyAvailable) {
@@ -75,7 +85,13 @@ export default function App() {
     }
   }, [isEnvironmentKeyAvailable]);
 
-  const selectedPlatform = platforms.find((platform) => platform.ratio === aspectRatio);
+  useEffect(() => {
+    return () => {
+      if (previewAudioUrl) {
+        URL.revokeObjectURL(previewAudioUrl);
+      }
+    };
+  }, [previewAudioUrl]);
 
   const saveSettings = () => {
     localStorage.setItem('gemini_api_key', tempApiKey);
@@ -84,6 +100,18 @@ export default function App() {
     if (error?.includes('API Key')) {
       setError(null);
     }
+  };
+
+  const clearPreviewAudio = () => {
+    if (previewAudioUrl) {
+      URL.revokeObjectURL(previewAudioUrl);
+    }
+    setPreviewAudioUrl(null);
+  };
+
+  const buildPreviewScript = () => {
+    const product = prompt.trim() || 'สินค้าตัวนี้';
+    return selectedStyle.previewTemplate.replace('{product}', product);
   };
 
   const processFiles = (files: FileList | File[]) => {
@@ -159,6 +187,52 @@ export default function App() {
     setError('Please configure your Gemini API Key in settings first.');
     setIsSettingsOpen(true);
     return false;
+  };
+
+  const handleVoiceCategoryChange = (category: VoiceCategory) => {
+    setSelectedVoiceCategory(category);
+    const firstVoiceInCategory = voicePresets.find((voice) => voice.category === category);
+    if (firstVoiceInCategory) {
+      setSelectedVoiceId(firstVoiceInCategory.id);
+    }
+    clearPreviewAudio();
+  };
+
+  const handleVoiceChange = (voiceId: string) => {
+    setSelectedVoiceId(voiceId);
+    clearPreviewAudio();
+  };
+
+  const handleStyleChange = (styleId: string) => {
+    setSelectedStyleId(styleId);
+    clearPreviewAudio();
+  };
+
+  const handlePreviewVoice = async () => {
+    if (!requireApiKey()) {
+      return;
+    }
+
+    setIsPreviewingVoice(true);
+    setError(null);
+
+    try {
+      const audioUrl = await generateSpeechAudio({
+        apiKey,
+        script: buildPreviewScript(),
+        voiceName: selectedVoice.voiceName,
+        deliveryDirection: selectedStyle.deliveryDirection,
+      });
+      if (previewAudioUrl) {
+        URL.revokeObjectURL(previewAudioUrl);
+      }
+      setPreviewAudioUrl(audioUrl);
+    } catch (err: any) {
+      console.error('Voice preview error:', err);
+      setError(err.message || 'Failed to preview the selected voice.');
+    } finally {
+      setIsPreviewingVoice(false);
+    }
   };
 
   const handleGenerateImage = async () => {
@@ -250,7 +324,12 @@ export default function App() {
         videoType,
       });
 
-      const audioUrl = await generateSpeechAudio({ apiKey, script });
+      const audioUrl = await generateSpeechAudio({
+        apiKey,
+        script,
+        voiceName: selectedVoice.voiceName,
+        deliveryDirection: selectedStyle.deliveryDirection,
+      });
       setGeneratedAudioUrl(audioUrl);
 
       const videoUrl = await generateVideoFromImage({
@@ -322,6 +401,12 @@ export default function App() {
         aspectRatio,
         platformName: selectedPlatform?.name,
         referenceImages,
+        voiceLabel: selectedVoice.label,
+        voiceEnergy: selectedVoice.energy,
+        styleLabel: selectedStyle.label,
+        styleDescription: selectedStyle.description,
+        styleScriptDirection: selectedStyle.scriptDirection,
+        styleSceneDirection: selectedStyle.sceneDirection,
       });
       setSalesReview(review);
       setReviewAudioUrl(null);
@@ -352,6 +437,8 @@ export default function App() {
       const audioUrl = await generateSpeechAudio({
         apiKey,
         script: salesReview.script,
+        voiceName: selectedVoice.voiceName,
+        deliveryDirection: selectedStyle.deliveryDirection,
       });
       setReviewAudioUrl(audioUrl);
     } catch (err) {
@@ -468,6 +555,19 @@ export default function App() {
             onGeneratePrompts={handleGeneratePromptsOnly}
             onGenerateSalesReview={handleGenerateSalesReview}
             onGenerateVideo={handleGenerateVideo}
+            reviewVoiceStyleSlot={
+              <ReviewVoiceStylePanel
+                selectedCategory={selectedVoiceCategory}
+                selectedVoiceId={selectedVoiceId}
+                selectedStyleId={selectedStyleId}
+                isPreviewingVoice={isPreviewingVoice}
+                previewAudioUrl={previewAudioUrl}
+                onCategoryChange={handleVoiceCategoryChange}
+                onVoiceChange={handleVoiceChange}
+                onStyleChange={handleStyleChange}
+                onPreviewVoice={handlePreviewVoice}
+              />
+            }
           />
 
           <SalesReviewPanel
@@ -519,4 +619,3 @@ export default function App() {
     </div>
   );
 }
-
