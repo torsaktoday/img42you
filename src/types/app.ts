@@ -47,6 +47,8 @@ export interface SalesReview {
 export type VideoType = 'grok' | 'flow';
 export type VeoModel = 'fast' | 'normal';
 export type VoiceCategory = 'female' | 'male' | 'kid' | 'teen';
+export type VoiceSpeed = 'slow' | 'balanced' | 'fast';
+export type VoiceMood = 'warm' | 'excited' | 'urgent' | 'playful' | 'luxury';
 
 export interface VoicePreset {
   id: string;
@@ -66,4 +68,21 @@ export interface ReviewStylePreset {
   sceneDirection: string;
   deliveryDirection: string;
   previewTemplate: string;
+}
+
+export interface VoiceSpeedPreset {
+  id: VoiceSpeed;
+  label: string;
+  description: string;
+  ttsDirection: string;
+  scriptDirection: string;
+}
+
+export interface VoiceMoodPreset {
+  id: VoiceMood;
+  label: string;
+  description: string;
+  ttsDirection: string;
+  scriptDirection: string;
+  sceneDirection: string;
 }

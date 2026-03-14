@@ -3,7 +3,9 @@ import type {
   PlatformOption,
   ReviewStylePreset,
   VideoTypeOption,
+  VoiceMoodPreset,
   VoicePreset,
+  VoiceSpeedPreset,
 } from '../types/app';
 
 export const platforms: PlatformOption[] = [
@@ -25,7 +27,6 @@ export const videoTypes: VideoTypeOption[] = [
   { id: 'flow', name: 'Flow (8-9s)', description: 'Extended cinematic flow' },
 ];
 
-// Curated presets mapped to official Gemini prebuilt voices.
 export const voicePresets: VoicePreset[] = [
   {
     id: 'female-warm-sulafat',
@@ -143,5 +144,72 @@ export const reviewStyles: ReviewStylePreset[] = [
     sceneDirection: 'Scene prompts should feel playful and social-first with smiley performance, friendly camera movement, relatable actions, and entertaining product interaction.',
     deliveryDirection: 'Read in Thai with playful fun energy. Charming, lively, friendly, and enjoyable, like a content creator who sells naturally while entertaining.',
     previewTemplate: 'ถ้าใครอยากได้คอนเทนต์ขายของแบบเพลิน ๆ ต้องลอง {product} ตัวนี้เลย ใช้ง่าย ฟีลดี ดูแล้วอยากกดตะกร้าตามทันที',
+  },
+];
+
+export const voiceSpeedPresets: VoiceSpeedPreset[] = [
+  {
+    id: 'slow',
+    label: 'ช้าชัด',
+    description: 'พูดช้าลงเล็กน้อย ชัดถ้อยชัดคำ ฟังง่ายขึ้น',
+    ttsDirection: 'Speak slightly slower than normal with crisp articulation and intentional pauses for clarity.',
+    scriptDirection: 'Prefer shorter phrases and clear sentence breaks so the Thai narration sounds clean and easy to follow.',
+  },
+  {
+    id: 'balanced',
+    label: 'สมดุล',
+    description: 'จังหวะพอดี ฟังลื่น เหมาะกับรีวิวส่วนใหญ่',
+    ttsDirection: 'Speak at a balanced natural pace, smooth and easy to listen to.',
+    scriptDirection: 'Keep the Thai phrasing balanced, smooth, and natural for general social commerce delivery.',
+  },
+  {
+    id: 'fast',
+    label: 'เร็วขายของ',
+    description: 'สปีดไวขึ้น เหมาะกับไลฟ์สดและคลิปเร่งปิดการขาย',
+    ttsDirection: 'Speak faster with energetic cadence while keeping the Thai words understandable and punchy.',
+    scriptDirection: 'Use tighter Thai phrasing and momentum-driven wording that still stays clear when spoken quickly.',
+  },
+];
+
+export const voiceMoodPresets: VoiceMoodPreset[] = [
+  {
+    id: 'warm',
+    label: 'อบอุ่นน่าเชื่อถือ',
+    description: 'น้ำเสียงจริงใจ ฟังน่าเชื่อถือ เหมาะกับสายรีวิวและสินค้าสุขภาพ',
+    ttsDirection: 'Keep the voice warm, caring, sincere, and trustworthy.',
+    scriptDirection: 'Use Thai wording that feels honest, reassuring, and credible.',
+    sceneDirection: 'Scenes should feel clean, trustworthy, and confidence-building with warm expressions and believable product interaction.',
+  },
+  {
+    id: 'excited',
+    label: 'ตื่นเต้นว้าว',
+    description: 'พลังบวกสูง ดูมีความว้าว เหมาะกับคลิปปั้นอารมณ์',
+    ttsDirection: 'Keep the voice excited, bright, animated, and emotionally elevated.',
+    scriptDirection: 'Use Thai copy that feels enthusiastic, vivid, and high-energy without losing clarity.',
+    sceneDirection: 'Scenes should have surprise, delight, expressive reactions, and stronger emotional lift.',
+  },
+  {
+    id: 'urgent',
+    label: 'เร่งด่วนปิดการขาย',
+    description: 'ฟีลต้องกดตอนนี้ มีแรงเร่งเรื่องราคา โปร หรือของมีจำกัด',
+    ttsDirection: 'Keep the voice urgent, persuasive, and conversion-focused with strong call-to-action timing.',
+    scriptDirection: 'Use Thai copy with urgency, scarcity cues, and stronger buying momentum.',
+    sceneDirection: 'Scenes should create urgency with direct-to-camera CTA, active gestures, and stronger shopping cues.',
+  },
+  {
+    id: 'playful',
+    label: 'สนุกเป็นกันเอง',
+    description: 'ดูสนุก คุยง่าย เข้าถึงง่าย ฟังแล้วไม่แข็ง',
+    ttsDirection: 'Keep the voice playful, friendly, and socially engaging.',
+    scriptDirection: 'Use Thai wording that feels casual, charming, and entertaining.',
+    sceneDirection: 'Scenes should feel lively, social, and creator-like with smiley expressions and fun interaction.',
+  },
+  {
+    id: 'luxury',
+    label: 'พรีเมียมหรู',
+    description: 'ฟังพรีเมียม สุขุม ดูแพง เหมาะกับสินค้า high-end',
+    ttsDirection: 'Keep the voice polished, premium, elegant, and composed.',
+    scriptDirection: 'Use refined Thai wording that feels premium, aspirational, and selective.',
+    sceneDirection: 'Scenes should feel elevated and premium with poised performance, elegant styling, and hero product presentation.',
   },
 ];

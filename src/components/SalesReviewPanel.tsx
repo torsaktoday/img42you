@@ -81,21 +81,29 @@ export function SalesReviewPanel({
               ))}
             </div>
 
-            <div className="pt-4 border-t border-emerald-500/10">
-              {!reviewAudioUrl ? (
+            <div className="pt-4 border-t border-emerald-500/10 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <label className="text-[10px] font-bold text-emerald-500/60 uppercase block">AI Voice Track</label>
                 <button
                   onClick={onGenerateReviewAudio}
                   disabled={isGeneratingReviewAudio}
-                  className="w-full py-3 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border border-emerald-500/20"
+                  className="py-2 px-3 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 border border-emerald-500/20 disabled:opacity-50"
                 >
                   {isGeneratingReviewAudio ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  {isGeneratingReviewAudio ? 'Generating AI Voice...' : 'Generate AI Voice (Thai)'}
+                  {isGeneratingReviewAudio
+                    ? 'Generating AI Voice...'
+                    : reviewAudioUrl
+                      ? 'Regenerate AI Voice'
+                      : 'Generate AI Voice (Thai)'}
                 </button>
+              </div>
+
+              {reviewAudioUrl ? (
+                <audio key={reviewAudioUrl} src={reviewAudioUrl} controls className="w-full h-10 rounded-lg bg-black/40" />
               ) : (
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-emerald-500/60 uppercase block">AI Voice Generated</label>
-                  <audio key={reviewAudioUrl} src={reviewAudioUrl} controls className="w-full h-10 rounded-lg bg-black/40" />
-                </div>
+                <p className="text-[11px] text-zinc-500 leading-relaxed">
+                  ระบบจะพยายามสร้างเสียงให้อัตโนมัติหลังสร้าง Thai review เสร็จ และคุณกดสร้างใหม่ได้ถ้าปรับสปีดหรืออารมณ์เพิ่ม
+                </p>
               )}
             </div>
 

@@ -274,10 +274,11 @@ export async function generateSalesReview(params: {
   referenceImages: ReferenceImage[];
   voiceLabel: string;
   voiceEnergy: string;
-  styleLabel: string;
+  deliveryProfile: string;
   styleDescription: string;
-  styleScriptDirection: string;
-  styleSceneDirection: string;
+  scriptDirection: string;
+  sceneDirection: string;
+  deliveryDirection: string;
 }): Promise<SalesReview> {
   const ai = createClient(params.apiKey);
   const parts = getImageParts(params.referenceImages);
@@ -295,11 +296,12 @@ export async function generateSalesReview(params: {
     CREATIVE DIRECTION:
     - Seller voice persona: ${params.voiceLabel}
     - Voice energy: ${params.voiceEnergy}
-    - Target delivery style: ${params.styleLabel}
+    - Delivery profile: ${params.deliveryProfile}
     - Style description: ${params.styleDescription}
-    - Script direction: ${params.styleScriptDirection}
-    - Scene direction: ${params.styleSceneDirection}
-    - The narration must sound excellent when spoken out loud in Thai with this selected voice persona and style.
+    - Script direction: ${params.scriptDirection}
+    - Scene direction: ${params.sceneDirection}
+    - Spoken delivery direction: ${params.deliveryDirection}
+    - The narration must sound excellent when spoken out loud in Thai with this selected voice persona and delivery profile.
     
     Requirements for the script:
     - Use persuasive, energetic, and natural Thai language (Expert level).
@@ -309,16 +311,16 @@ export async function generateSalesReview(params: {
       2. PAIN POINT: Deeply empathize with the user's problem.
       3. SOLUTION: How this product solves it perfectly. Highlight unique features.
       4. CALL TO ACTION: Urgency to click the basket/link.
-    - The copy must match the selected selling style, rhythm, and performance energy.
+    - The copy must match the selected selling style, speaking speed, mood, and performance energy.
     
     Also, provide 6 cinematic scene descriptions. For each scene, provide:
-    - description: Motion Prompt for video generation (camera movement, action). Make sure the motion and performance reflect the chosen selling style.
+    - description: Motion Prompt for video generation (camera movement, action). Make sure the motion and performance reflect the chosen selling style and mood.
     - imagePrompt: A high-quality, detailed prompt for generating a static image. 
       CRITICAL: Describe the product with extreme detail (labels, colors, bottle shape) based on your research. 
       Ensure the character's appearance (face) is consistent with the reference image.
       Describe the clothing clearly (e.g., "wearing a clean white t-shirt") to maintain consistency.
       The image must be clean with NO watermarks, NO text, and NO logos except the product label.
-      The pose, facial expression, and styling must reflect the chosen style direction.
+      The pose, facial expression, and styling must reflect the chosen style direction and emotional tone.
     - narration: The specific Thai dialogue/narration for this exact scene.
     
     Return the result in JSON format:
