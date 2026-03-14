@@ -49,28 +49,30 @@ export function OutputPanel({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="w-full h-full relative group z-10 p-4 flex flex-col items-center justify-center"
+          className="w-full h-full relative z-10 p-4 flex flex-col items-center justify-center gap-4"
         >
-          <video
-            ref={videoRef}
-            src={generatedVideoUrl}
-            className="max-w-full max-h-full rounded-2xl shadow-2xl"
-            loop
-            onClick={onPlayVideo}
-          />
+          <div className="flex-1 w-full flex items-center justify-center min-h-0">
+            <video
+              ref={videoRef}
+              src={generatedVideoUrl}
+              className="max-w-full max-h-full rounded-2xl shadow-2xl"
+              loop
+              onClick={onPlayVideo}
+            />
+          </div>
           {generatedAudioUrl && <audio ref={audioRef} src={generatedAudioUrl} className="hidden" />}
 
-          <div className="absolute bottom-8 flex gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+          <div className="w-full flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-zinc-700/70 bg-zinc-950/80 p-3 backdrop-blur-md">
             <button
               onClick={onPlayVideo}
-              className="flex items-center gap-2 px-5 py-3 bg-indigo-600 border border-indigo-500 rounded-xl text-sm font-medium hover:bg-indigo-500 hover:scale-105 transition-all shadow-xl text-white"
+              className="flex items-center justify-center gap-2 px-5 py-3 bg-indigo-600 border border-indigo-500 rounded-xl text-sm font-medium hover:bg-indigo-500 transition-all shadow-xl text-white min-h-11"
             >
               Play with Audio
             </button>
             <a
               href={generatedVideoUrl}
               download={getRandomFileName('mp4')}
-              className="flex items-center gap-2 px-5 py-3 bg-zinc-900/90 backdrop-blur-md border border-zinc-700 rounded-xl text-sm font-medium hover:bg-zinc-800 hover:scale-105 transition-all shadow-xl text-white"
+              className="flex items-center justify-center gap-2 px-5 py-3 bg-zinc-900/90 backdrop-blur-md border border-zinc-700 rounded-xl text-sm font-medium hover:bg-zinc-800 transition-all shadow-xl text-white min-h-11"
             >
               <Download className="w-4 h-4" />
               Download Video
@@ -82,14 +84,16 @@ export function OutputPanel({
           initial={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
           animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="w-full h-full relative group z-10 p-4"
+          className="w-full h-full relative z-10 p-4 flex flex-col gap-4"
         >
-          <img src={generatedImage} alt="Generated AI Art" className="w-full h-full object-contain rounded-2xl shadow-2xl" />
-          <div className="absolute bottom-8 right-8 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+          <div className="flex-1 min-h-0 flex items-center justify-center">
+            <img src={generatedImage} alt="Generated AI Art" className="w-full h-full object-contain rounded-2xl shadow-2xl" />
+          </div>
+          <div className="w-full flex justify-center">
             <a
               href={generatedImage}
               download={getRandomFileName()}
-              className="flex items-center gap-2 px-5 py-3 bg-zinc-900/90 backdrop-blur-md border border-zinc-700 rounded-xl text-sm font-medium hover:bg-zinc-800 hover:scale-105 transition-all shadow-xl text-white"
+              className="flex items-center justify-center gap-2 px-5 py-3 bg-zinc-900/90 backdrop-blur-md border border-zinc-700 rounded-xl text-sm font-medium hover:bg-zinc-800 transition-all shadow-xl text-white min-h-11"
             >
               <Download className="w-4 h-4" />
               Download High-Res

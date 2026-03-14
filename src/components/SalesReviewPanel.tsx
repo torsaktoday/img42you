@@ -45,6 +45,13 @@ interface SceneMotionPreviewProps {
   isPlaying: boolean;
 }
 
+function downloadAsset(url: string, fileName: string) {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+}
+
 function SceneMotionPreview({ imageUrl, aspectRatioClass, preset, isPlaying }: SceneMotionPreviewProps) {
   return (
     <div className={`relative ${aspectRatioClass} rounded-xl overflow-hidden border border-cyan-400/20 bg-black`}>
@@ -225,6 +232,7 @@ export function SalesReviewPanel({
                   const sceneImage = sceneImageUrls[index] || generatedImage;
                   const sceneMotion = sceneMotionPresets[index];
                   const isMotionPlaying = !!playingSceneMotion[index];
+                  const canGenerateSceneVideo = !!(generatedImage || sceneImageUrls[index]);
 
                   return (
                     <div key={`${scene.narration}-${index}`} className="p-4 bg-black/30 rounded-2xl border border-white/5 space-y-4">
@@ -254,44 +262,44 @@ export function SalesReviewPanel({
                           </div>
 
                           {sceneImageUrls[index] ? (
-                            <div className={`relative ${aspectRatioClass} rounded-xl overflow-hidden border border-white/10 shadow-lg group`}>
-                              <img src={sceneImageUrls[index]} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            <div className="space-y-2">
+                              <div className={`relative ${aspectRatioClass} rounded-xl overflow-hidden border border-white/10 shadow-lg`}>
+                                <img src={sceneImageUrls[index]} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
 
-                              {isGeneratingSceneImage === index && (
-                                <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-20">
-                                  <Loader2 className="w-6 h-6 text-indigo-500 animate-spin mb-2" />
-                                  <span className="text-[10px] font-bold text-indigo-400 animate-pulse uppercase tracking-widest">
-                                    Regenerating...
-                                  </span>
-                                </div>
-                              )}
+                                {isGeneratingSceneImage === index && (
+                                  <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                                    <Loader2 className="w-6 h-6 text-indigo-500 animate-spin mb-2" />
+                                    <span className="text-[10px] font-bold text-indigo-400 animate-pulse uppercase tracking-widest">
+                                      Regenerating...
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
 
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                              <div className="flex flex-wrap gap-2">
                                 <button
                                   onClick={() => onExpandImage(sceneImageUrls[index])}
-                                  className="p-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 text-white"
+                                  className="px-3 py-2 rounded-xl bg-zinc-900/75 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-[10px] font-bold transition-all inline-flex items-center gap-1.5"
                                   title="Expand Image"
                                 >
-                                  <Maximize2 className="w-4 h-4" />
+                                  <Maximize2 className="w-3.5 h-3.5" />
+                                  View Image
                                 </button>
                                 <button
-                                  onClick={() => {
-                                    const link = document.createElement('a');
-                                    link.href = sceneImageUrls[index];
-                                    link.download = `scene-${index + 1}.png`;
-                                    link.click();
-                                  }}
-                                  className="p-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 text-white"
+                                  onClick={() => downloadAsset(sceneImageUrls[index], `scene-${index + 1}.png`)}
+                                  className="px-3 py-2 rounded-xl bg-zinc-900/75 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-[10px] font-bold transition-all inline-flex items-center gap-1.5"
                                   title="Download Image"
                                 >
-                                  <Download className="w-4 h-4" />
+                                  <Download className="w-3.5 h-3.5" />
+                                  Download Image
                                 </button>
                                 <button
                                   onClick={() => onGenerateSceneImage(scene.imagePrompt, index)}
-                                  className="p-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 text-white"
+                                  className="px-3 py-2 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-400/20 text-indigo-300 text-[10px] font-bold transition-all inline-flex items-center gap-1.5"
                                   title="Regenerate Image"
                                 >
-                                  <Sparkles className="w-4 h-4" />
+                                  <Sparkles className="w-3.5 h-3.5" />
+                                  Regenerate
                                 </button>
                               </div>
                             </div>
@@ -404,35 +412,52 @@ export function SalesReviewPanel({
                           </div>
 
                           {sceneVideoUrls[index] ? (
-                            <div className={`relative ${aspectRatioClass} rounded-xl overflow-hidden border border-emerald-500/20 shadow-lg group`}>
-                              <video src={sceneVideoUrls[index]} controls className="w-full h-full object-cover" />
+                            <div className="space-y-2">
+                              <div className={`relative ${aspectRatioClass} rounded-xl overflow-hidden border border-emerald-500/20 shadow-lg`}>
+                                <video src={sceneVideoUrls[index]} controls className="w-full h-full object-cover" />
 
-                              {isGeneratingSceneVideo === index && (
-                                <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-20">
-                                  <Loader2 className="w-6 h-6 text-emerald-500 animate-spin mb-2" />
-                                  <span className="text-[10px] font-bold text-emerald-400 animate-pulse uppercase tracking-widest">
-                                    Animating...
-                                  </span>
-                                </div>
-                              )}
+                                {isGeneratingSceneVideo === index && (
+                                  <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                                    <Loader2 className="w-6 h-6 text-emerald-500 animate-spin mb-2" />
+                                    <span className="text-[10px] font-bold text-emerald-400 animate-pulse uppercase tracking-widest">
+                                      Animating...
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
 
-                              <button
-                                onClick={() => {
-                                  const link = document.createElement('a');
-                                  link.href = sceneVideoUrls[index];
-                                  link.download = `hero-shot-${index + 1}.mp4`;
-                                  link.click();
-                                }}
-                                className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-lg hover:bg-emerald-500 transition-colors opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                <Download className="w-3.5 h-3.5" />
-                              </button>
+                              <div className="flex flex-wrap gap-2">
+                                <button
+                                  onClick={() => downloadAsset(sceneVideoUrls[index], `hero-shot-${index + 1}.mp4`)}
+                                  className="px-3 py-2 rounded-xl bg-zinc-900/75 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-[10px] font-bold transition-all inline-flex items-center gap-1.5"
+                                >
+                                  <Download className="w-3.5 h-3.5" />
+                                  Download Video
+                                </button>
+                                <button
+                                  onClick={() => onGenerateSceneVideo(scene.description, index)}
+                                  disabled={isGeneratingSceneVideo !== null || !canGenerateSceneVideo}
+                                  className="px-3 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/20 text-emerald-300 text-[10px] font-bold transition-all inline-flex items-center gap-1.5 disabled:opacity-30"
+                                >
+                                  {isGeneratingSceneVideo === index ? (
+                                    <>
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                      Animating...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Sparkles className="w-3.5 h-3.5" />
+                                      Regenerate Video
+                                    </>
+                                  )}
+                                </button>
+                              </div>
                             </div>
                           ) : (
                             <div className={`relative ${aspectRatioClass} rounded-xl overflow-hidden border border-emerald-500/10 bg-emerald-500/5 flex items-center justify-center`}>
                               <button
                                 onClick={() => onGenerateSceneVideo(scene.description, index)}
-                                disabled={isGeneratingSceneVideo !== null || (!generatedImage && !sceneImageUrls[index])}
+                                disabled={isGeneratingSceneVideo !== null || !canGenerateSceneVideo}
                                 className="flex flex-col items-center gap-2 text-emerald-500/60 hover:text-emerald-400 transition-colors group disabled:opacity-30 disabled:hover:text-emerald-500/60"
                               >
                                 {isGeneratingSceneVideo === index ? (
