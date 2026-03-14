@@ -1,0 +1,5 @@
+{
+  "name": "AI Image Studio",
+  "description": "Generate and edit images using Gemini 2.5 Flash Image model with optional reference image upload.",
+  "requestFramePermissions": []
+}
