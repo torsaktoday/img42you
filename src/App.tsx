@@ -29,12 +29,92 @@ import type {
   CinematicPrompts,
   ReferenceImage,
   SalesReview,
+  SceneMotionExportFormat,
+  SceneMotionPreset,
   VeoModel,
   VideoType,
   VoiceCategory,
   VoiceMood,
   VoiceSpeed,
 } from './types/app';
+import { exportSceneMotionVideo, getSceneMotionExportSupport } from './utils/localMotion';
+
+function createSceneMotionPreset(index: number): SceneMotionPreset {
+  const templates: SceneMotionPreset[] = [
+    {
+      id: `push-${index}`,
+      style: 'push-in',
+      duration: 5.8,
+      scaleFrom: 1,
+      scaleTo: 1.18,
+      xFrom: 0,
+      xTo: -10,
+      yFrom: 0,
+      yTo: -18,
+      rotateFrom: 0,
+      rotateTo: -1.1,
+      overlayStrength: 0.35,
+    },
+    {
+      id: `drift-${index}`,
+      style: 'drift',
+      duration: 6.4,
+      scaleFrom: 1.05,
+      scaleTo: 1.14,
+      xFrom: -18,
+      xTo: 18,
+      yFrom: 6,
+      yTo: -10,
+      rotateFrom: -0.8,
+      rotateTo: 0.8,
+      overlayStrength: 0.28,
+    },
+    {
+      id: `float-${index}`,
+      style: 'float',
+      duration: 5.2,
+      scaleFrom: 1.02,
+      scaleTo: 1.11,
+      xFrom: 0,
+      xTo: 0,
+      yFrom: 10,
+      yTo: -16,
+      rotateFrom: -0.6,
+      rotateTo: 0.6,
+      overlayStrength: 0.24,
+    },
+    {
+      id: `spotlight-${index}`,
+      style: 'spotlight',
+      duration: 6,
+      scaleFrom: 1.04,
+      scaleTo: 1.16,
+      xFrom: -12,
+      xTo: 12,
+      yFrom: -8,
+      yTo: 8,
+      rotateFrom: 0,
+      rotateTo: 0.9,
+      overlayStrength: 0.4,
+    },
+    {
+      id: `parallax-${index}`,
+      style: 'parallax',
+      duration: 6.8,
+      scaleFrom: 1.08,
+      scaleTo: 1.2,
+      xFrom: 14,
+      xTo: -14,
+      yFrom: 12,
+      yTo: -12,
+      rotateFrom: 0.7,
+      rotateTo: -0.7,
+      overlayStrength: 0.32,
+    },
+  ];
+
+  return templates[index % templates.length];
+}
 
 export default function App() {
   const [prompt, setPrompt] = useState('');
@@ -55,8 +135,13 @@ export default function App() {
   const [reviewAudioUrl, setReviewAudioUrl] = useState<string | null>(null);
   const [isGeneratingSceneVideo, setIsGeneratingSceneVideo] = useState<number | null>(null);
   const [isGeneratingSceneImage, setIsGeneratingSceneImage] = useState<number | null>(null);
+  const [isGeneratingSceneMotion, setIsGeneratingSceneMotion] = useState<number | null>(null);
   const [sceneVideoUrls, setSceneVideoUrls] = useState<Record<number, string>>({});
   const [sceneImageUrls, setSceneImageUrls] = useState<Record<number, string>>({});
+  const [sceneMotionPresets, setSceneMotionPresets] = useState<Record<number, SceneMotionPreset>>({});
+  const [playingSceneMotion, setPlayingSceneMotion] = useState<Record<number, boolean>>({});
+  const [sceneMotionExportSupport, setSceneMotionExportSupport] = useState({ webm: false, mp4: false });
+  const [exportingSceneMotionKey, setExportingSceneMotionKey] = useState<string | null>(null);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const [veoModel, setVeoModel] = useState<VeoModel>('fast');
   const [brainModel, setBrainModel] = useState('gemini-3-flash-preview');
@@ -96,6 +181,10 @@ export default function App() {
 
   const reviewSceneDirection = [selectedStyle.sceneDirection, selectedMood.sceneDirection].join(' ');
   const deliveryProfile = `${selectedStyle.label} / ${selectedSpeed.label} / ${selectedMood.label}`;
+
+  useEffect(() => {
+    setSceneMotionExportSupport(getSceneMotionExportSupport());
+  }, []);
 
   useEffect(() => {
     if (isEnvironmentKeyAvailable) {
@@ -431,6 +520,8 @@ export default function App() {
     setReviewAudioUrl(null);
     setSceneVideoUrls({});
     setSceneImageUrls({});
+    setSceneMotionPresets({});
+    setPlayingSceneMotion({});
 
     try {
       const review = await generateSalesReview({
@@ -548,6 +639,67 @@ export default function App() {
     }
   };
 
+  const handleGenerateSceneMotion = async (index: number) => {
+    const baseImage = sceneImageUrls[index] || generatedImage;
+    if (!baseImage) {
+      setError('Please generate an image first before creating No API motion.');
+      return;
+    }
+
+    setIsGeneratingSceneMotion(index);
+    setError(null);
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      const preset = createSceneMotionPreset(index);
+      setSceneMotionPresets((prev) => ({ ...prev, [index]: preset }));
+      setPlayingSceneMotion((prev) => ({ ...prev, [index]: true }));
+    } finally {
+      setIsGeneratingSceneMotion(null);
+    }
+  };
+
+  const handleToggleSceneMotion = (index: number) => {
+    setPlayingSceneMotion((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
+
+  const handleDownloadSceneMotion = async (index: number, format: SceneMotionExportFormat) => {
+    const sceneImage = sceneImageUrls[index] || generatedImage;
+    const preset = sceneMotionPresets[index];
+
+    if (!sceneImage || !preset) {
+      setError('Please generate a No API motion preview first before downloading it.');
+      return;
+    }
+
+    const exportKey = `${index}:${format}`;
+    setExportingSceneMotionKey(exportKey);
+    setError(null);
+
+    try {
+      const exportResult = await exportSceneMotionVideo({
+        imageUrl: sceneImage,
+        preset,
+        aspectRatio,
+        format,
+      });
+
+      const link = document.createElement('a');
+      link.href = exportResult.url;
+      link.download = `scene-${index + 1}-loop.${exportResult.extension}`;
+      link.click();
+
+      window.setTimeout(() => {
+        URL.revokeObjectURL(exportResult.url);
+      }, 2000);
+    } catch (err: any) {
+      console.error('Scene motion export error:', err);
+      setError(err.message || `Failed to export ${format.toUpperCase()} for Scene ${index + 1}.`);
+    } finally {
+      setExportingSceneMotionKey(null);
+    }
+  };
+
   const handleVideoPlay = () => {
     if (videoRef.current && audioRef.current) {
       videoRef.current.currentTime = 0;
@@ -626,14 +778,22 @@ export default function App() {
             isGeneratingReviewAudio={isGeneratingReviewAudio}
             isGeneratingSceneVideo={isGeneratingSceneVideo}
             isGeneratingSceneImage={isGeneratingSceneImage}
+            isGeneratingSceneMotion={isGeneratingSceneMotion}
+            exportingSceneMotionKey={exportingSceneMotionKey}
+            sceneMotionExportSupport={sceneMotionExportSupport}
             sceneVideoUrls={sceneVideoUrls}
             sceneImageUrls={sceneImageUrls}
+            sceneMotionPresets={sceneMotionPresets}
+            playingSceneMotion={playingSceneMotion}
             aspectRatio={aspectRatio}
             generatedImage={generatedImage}
             onClose={() => setSalesReview(null)}
             onGenerateReviewAudio={handleGenerateReviewAudio}
             onGenerateSceneImage={handleGenerateSceneImage}
             onGenerateSceneVideo={handleGenerateSceneVideo}
+            onGenerateSceneMotion={handleGenerateSceneMotion}
+            onToggleSceneMotion={handleToggleSceneMotion}
+            onDownloadSceneMotion={handleDownloadSceneMotion}
             onExpandImage={setExpandedImage}
           />
 

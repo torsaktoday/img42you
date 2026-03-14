@@ -49,6 +49,8 @@ export type VeoModel = 'fast' | 'normal';
 export type VoiceCategory = 'female' | 'male' | 'kid' | 'teen';
 export type VoiceSpeed = 'slow' | 'balanced' | 'fast';
 export type VoiceMood = 'warm' | 'excited' | 'urgent' | 'playful' | 'luxury';
+export type SceneMotionStyle = 'push-in' | 'drift' | 'float' | 'spotlight' | 'parallax';
+export type SceneMotionExportFormat = 'webm' | 'mp4';
 
 export interface VoicePreset {
   id: string;
@@ -85,4 +87,19 @@ export interface VoiceMoodPreset {
   ttsDirection: string;
   scriptDirection: string;
   sceneDirection: string;
+}
+
+export interface SceneMotionPreset {
+  id: string;
+  style: SceneMotionStyle;
+  duration: number;
+  scaleFrom: number;
+  scaleTo: number;
+  xFrom: number;
+  xTo: number;
+  yFrom: number;
+  yTo: number;
+  rotateFrom: number;
+  rotateTo: number;
+  overlayStrength: number;
 }
